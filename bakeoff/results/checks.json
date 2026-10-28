@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-28T04:42:06.815Z",
+  "results": [
+    {
+      "file": "engine\\example-game.js",
+      "brief": "example",
+      "static": true,
+      "loads": true,
+      "typeMatches": true,
+      "runs": true,
+      "works": true,
+      "deterministic": true,
+      "type": "survival",
+      "finished": true,
+      "result": 5,
+      "pass": true
+    },
+    {
+      "file": "out\\gemini-flash-latest\\b01.js",
+      "brief": "b01",
+      "static": true,
+      "loads": true,
+      "typeMatches": true,
+      "runs": true,
+      "works": true,
+      "deterministic": true,
+      "type": "highscore",
+      "finished": true,
+      "result": 302,
+      "pass": true
+    },
+    {
+      "file": "out\\gemini-flash-latest\\b03.js",
+      "brief": "b03",
+      "static": true,
+      "loads": true,
+      "typeMatches": true,
+      "runs": true,
+      "works": false,
+      "deterministic": true,
+      "type": "speedrun",
+      "finished": false,
+      "result": null,
+      "pass": false
+    },
+    {
+      "file": "out\\gemini-flash-latest\\b04.js",
+      "brief": "b04",
+      "static": true,
+      "loads": true,
+      "typeMatches": true,
+      "runs": true,
+      "works": true,
+      "deterministic": true,
+      "type": "survival",
+      "finished": true,
+      "result": 6,
+      "pass": true
+    }
+  ]
+}
