@@ -4,6 +4,28 @@ Newest first. One entry per session: date, who, what changed, what's next.
 
 ---
 
+## 2026-10-28 (3) — c-cheng10 (Claude), branch `website`
+
+**Done**
+- New branch `website` (worktree at `.worktrees/website` in c-cheng10's checkout). Everything is in `site/`; see `site/README.md`.
+- PICO-8-styled site: Today / Scores / Archive / How-to tabs, sandboxed game player, touch controls on phones, countdown to the next UTC day, share button.
+- Global leaderboard with server-side replay: the client sends the per-frame input log, the server re-runs the game and stores its own result. Best run per player per day.
+- Demo schedule: 10-26 example Rockfall (survival), 10-27 Gemini b03 Ice Cave (speedrun), 10-28 Gemini b01 Deep Sea Hook (highscore).
+
+**Verified**
+- A real browser run was replayed on the server and matched the score. A cut-off input log is rejected. Future dates and paths outside the site 404. Mobile layout at 375 px has no horizontal scroll.
+
+**Not done / risks**
+- Storage is JSON files on one server; needs a real DB and a host to go public. No hosting chosen.
+- `site/public/engine.js` is a copy of `bakeoff/engine/engine.js`. If the harness changes the engine, copy it over or replays break.
+- Cross-browser float determinism (e.g. `Math.sin` in Firefox vs V8 on the server) is untested. The server result is authoritative, so the worst case is a displayed score differing from the verified one.
+- No anti-spam beyond 20 submits/min per IP; names aren't profanity-filtered.
+
+**Next**
+- Pick hosting + DB. Wire the daily generator's output into `site/games/index.json`.
+
+---
+
 ## 2026-10-28 (2) — c-cheng10 (Claude)
 
 **Done**

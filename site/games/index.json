@@ -1,0 +1,5 @@
+[
+  { "date": "2026-10-26", "file": "2026-10-26.js", "title": "Rockfall", "type": "survival", "theme": "falling rocks", "mechanic": "dodge left and right", "model": "hand-written example" },
+  { "date": "2026-10-27", "file": "2026-10-27.js", "title": "Ice Cave", "type": "speedrun", "theme": "ice cave", "mechanic": "sliding momentum", "model": "gemini-3.8-flash" },
+  { "date": "2026-10-28", "file": "2026-10-28.js", "title": "Deep Sea Hook", "type": "highscore", "theme": "deep sea", "mechanic": "catch fish with a hook you lower and raise", "model": "gemini-3.8-flash" }
+]
