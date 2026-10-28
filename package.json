@@ -1,0 +1,10 @@
+{
+  "name": "daily-daily-game",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gen": "node --env-file=.env bakeoff/gen.mjs",
+    "check": "node bakeoff/check.mjs",
+    "play": "node bakeoff/serve.mjs"
+  }
+}

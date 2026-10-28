@@ -1,0 +1,12 @@
+[
+  { "id": "b01", "type": "highscore", "theme": "deep sea", "mechanic": "catch fish with a hook you lower and raise" },
+  { "id": "b02", "type": "highscore", "theme": "fruit stand", "mechanic": "chain combos by catching the same colour in a row" },
+  { "id": "b03", "type": "speedrun", "theme": "ice cave", "mechanic": "sliding momentum" },
+  { "id": "b04", "type": "survival", "theme": "asteroid belt", "mechanic": "rotate and thrust with inertia" },
+  { "id": "b05", "type": "highscore", "theme": "haunted library", "mechanic": "light radius that shrinks over time" },
+  { "id": "b06", "type": "speedrun", "theme": "rooftop city", "mechanic": "wall jump" },
+  { "id": "b07", "type": "survival", "theme": "volcano", "mechanic": "rising lava and crumbling platforms" },
+  { "id": "b08", "type": "highscore", "theme": "bee garden", "mechanic": "collect pollen and deliver it to the hive" },
+  { "id": "b09", "type": "speedrun", "theme": "maze of mirrors", "mechanic": "player and a mirrored twin move at once" },
+  { "id": "b10", "type": "survival", "theme": "bullet storm", "mechanic": "grazing bullets slows time" }
+]

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bake-off Playtest</title>
+<style>
+  body { margin: 0; background: #111; color: #ddd; font: 14px system-ui, sans-serif; display: flex; min-height: 100vh; }
+  #list { width: 220px; border-right: 1px solid #333; padding: 12px; overflow-y: auto; }
+  #list button { display: block; width: 100%; text-align: left; margin: 2px 0; padding: 6px 8px; background: #222; color: #ddd; border: 1px solid #333; cursor: pointer; }
+  #list button.active { border-color: #29ADFF; }
+  #list button .r { float: right; color: #FFA300; }
+  #main { flex: 1; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  iframe { width: 530px; height: 580px; border: 0; background: #000; }
+  .rate { display: flex; gap: 6px; align-items: center; }
+  .rate button { width: 32px; height: 28px; background: #222; color: #ddd; border: 1px solid #444; cursor: pointer; }
+  .rate button.on { background: #29ADFF; color: #000; }
+  .rate span { width: 120px; }
+  #brief { color: #aaa; text-align: center; }
+  .tools { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .tools button { padding: 6px; background: #222; color: #ddd; border: 1px solid #333; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="list">
+  <strong>Games</strong>
+  <div id="games"></div>
+  <div class="tools">
+    <button id="export">Export ratings JSON</button>
+    <button id="reveal">Reveal models</button>
+    <button id="reshuffle">Reshuffle order</button>
+  </div>
+</div>
+<div id="main">
+  <div id="brief">Pick a game. Click the game to focus it. Arrows move, Z = O, X = X, R restarts.</div>
+  <iframe id="frame" sandbox="allow-scripts"></iframe>
+  <div class="rate" data-k="fun"><span>Fun</span></div>
+  <div class="rate" data-k="match"><span>Matches the brief</span></div>
+</div>
+<script>
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+let games = [], briefs = {}, current = null, engineSrc = "", revealed = false;
+let ratings = store.get("ratings", {});
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+async function boot() {
+  const [list, b, eng] = await Promise.all([
+    fetch("/api/games").then((r) => r.json()),
+    fetch("briefs.json").then((r) => r.json()),
+    fetch("engine/engine.js").then((r) => r.text()),
+  ]);
+  briefs = Object.fromEntries(b.map((x) => [x.id, x]));
+  engineSrc = eng.replace(/^export /gm, "");
+  // Keep a stable blind order between reloads; new games are appended.
+  let order = store.get("order", []).filter((p) => list.some((g) => g.path === p));
+  for (const g of shuffle(list.filter((g) => !order.includes(g.path)))) order.push(g.path);
+  store.set("order", order);
+  games = order.map((p) => list.find((g) => g.path === p));
+  renderList();
+}
+
+function renderList() {
+  const el = document.getElementById("games");
+  el.innerHTML = "";
+  games.forEach((g, i) => {
+    const btn = document.createElement("button");
+    const r = ratings[g.path];
+    btn.textContent = `Game ${i + 1}` + (revealed ? ` (${g.model}/${g.brief})` : "");
+    if (r && r.fun && r.match) btn.innerHTML += `<span class="r">${r.fun}/${r.match}</span>`;
+    if (current === g) btn.className = "active";
+    btn.onclick = () => load(g);
+    el.appendChild(btn);
+  });
+}
+
+async function load(g) {
+  current = g;
+  const b = briefs[g.brief];
+  document.getElementById("brief").textContent = b
+    ? `${b.type.toUpperCase()}: ${b.theme} / ${b.mechanic}`
+    : "Example game (survival: dodge falling rocks)";
+  const src = await fetch(g.path, { cache: "no-store" }).then((r) => r.text());
+  const gameSrc = src.replace(/export\s+default/, "window.__game =");
+  const esc = (s) => s.replace(/<\/script/gi, "<\\/script");
+  document.getElementById("frame").srcdoc = `<!doctype html><html><head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<style>body{margin:0;background:#000;color:#ccc;font:13px monospace;text-align:center}canvas{width:512px;height:512px;image-rendering:pixelated;margin-top:8px}</style>
+</head><body><canvas width="128" height="128"></canvas><div id="s">click to focus</div>
+<script>${esc(engineSrc)}
+const eng = createEngine(1234);
+Object.assign(window, eng.api);
+<\/script>
+<script>try { ${esc(gameSrc)} } catch (e) { document.getElementById("s").textContent = "LOAD ERROR: " + e.message; }<\/script>
+<script>
+const cv = document.querySelector("canvas"), cx = cv.getContext("2d"), img = cx.createImageData(128, 128);
+const rgb = PALETTE.map((h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)));
+const KEYS = { ArrowLeft: 0, ArrowRight: 1, ArrowUp: 2, ArrowDown: 3, z: 4, Z: 4, x: 5, X: 5 };
+const held = [false, false, false, false, false, false];
+let game = window.__game, err = null, acc = 0, last = null, e2;
+addEventListener("keydown", (e) => { if (e.key in KEYS) { held[KEYS[e.key]] = true; e.preventDefault(); } if (e.key === "r" || e.key === "R") location.reload(); });
+addEventListener("keyup", (e) => { if (e.key in KEYS) held[KEYS[e.key]] = false; });
+function blit() {
+  for (let i = 0; i < eng.fb.length; i++) { const c = rgb[eng.fb[i]]; img.data.set([c[0], c[1], c[2], 255], i * 4); }
+  cx.putImageData(img, 0, 0);
+}
+function status() {
+  const s = eng.state, r = eng.result(game.type);
+  document.getElementById("s").textContent = err ? "ERROR: " + err
+    : game.type + "  |  " + (game.type === "speedrun" ? "time " + (s.frame / 30).toFixed(2) + "s" : "score " + s.score)
+      + (s.finished ? "  |  FINISHED: " + (game.type === "speedrun" ? r.toFixed(2) + "s" : r) + "  (R to restart)" : "");
+}
+function loop(now) {
+  if (last !== null) acc += Math.min(now - last, 250);
+  last = now;
+  try {
+    while (acc >= 1000 / 30) { eng.tick(game, held.slice()); acc -= 1000 / 30; }
+  } catch (e) { err = e.message; }
+  blit(); status();
+  if (!err) requestAnimationFrame(loop);
+}
+if (game) { try { eng.start(game); requestAnimationFrame(loop); } catch (e) { err = e.message; status(); } }
+<\/script></body></html>`;
+  renderRatings();
+  renderList();
+}
+
+function renderRatings() {
+  for (const row of document.querySelectorAll(".rate")) {
+    const k = row.dataset.k;
+    row.querySelectorAll("button").forEach((b) => b.remove());
+    for (let n = 1; n <= 5; n++) {
+      const b = document.createElement("button");
+      b.textContent = n;
+      if (current && ratings[current.path]?.[k] === n) b.className = "on";
+      b.onclick = () => {
+        if (!current) return;
+        ratings[current.path] = { ...ratings[current.path], [k]: n, model: current.model, brief: current.brief };
+        store.set("ratings", ratings);
+        renderRatings(); renderList();
+      };
+      row.appendChild(b);
+    }
+  }
+}
+
+document.getElementById("export").onclick = () => {
+  const blob = new Blob([JSON.stringify({ date: new Date().toISOString(), ratings }, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ratings.json";
+  a.click();
+};
+document.getElementById("reveal").onclick = () => { revealed = !revealed; renderList(); };
+document.getElementById("reshuffle").onclick = () => { store.set("order", []); boot(); };
+renderRatings();
+boot();
+</script>
+</body>
+</html>
