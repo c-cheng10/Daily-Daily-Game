@@ -10,7 +10,8 @@ const PORT = Number(process.env.PORT) || 8080;
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".md": "text/plain" };
 
 function listGames() {
-  const games = [{ path: "engine/example-game.js", model: "example", brief: "example" }];
+  const games = fs.readdirSync(path.join(root, "engine")).filter((f) => /^example-.*\.js$/.test(f))
+    .map((f) => ({ path: `engine/${f}`, model: "example", brief: f.replace(/\.js$/, "") }));
   const out = path.join(root, "out");
   if (fs.existsSync(out)) {
     for (const model of fs.readdirSync(out)) {

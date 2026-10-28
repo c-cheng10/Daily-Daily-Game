@@ -33,6 +33,7 @@
 </div>
 <div id="main">
   <div id="brief">Pick a game. Click the game to focus it. Arrows move, Z = O, X = X, R restarts.</div>
+  <label><input type="checkbox" id="watchbot"> Watch the game's own bot play (rate with it off)</label>
   <iframe id="frame" sandbox="allow-scripts"></iframe>
   <div class="rate" data-k="fun"><span>Fun</span></div>
   <div class="rate" data-k="match"><span>Matches the brief</span></div>
@@ -42,7 +43,7 @@ const store = {
   get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
-let games = [], briefs = {}, current = null, engineSrc = "", revealed = false;
+let games = [], briefs = {}, current = null, engineSrc = "", wordsSrc = "", revealed = false;
 let ratings = store.get("ratings", {});
 
 function shuffle(a) {
@@ -51,13 +52,16 @@ function shuffle(a) {
 }
 
 async function boot() {
-  const [list, b, eng] = await Promise.all([
+  const [list, b, b2, eng, words] = await Promise.all([
     fetch("/api/games").then((r) => r.json()),
     fetch("briefs.json").then((r) => r.json()),
+    fetch("briefs-genres.json").then((r) => r.json()).catch(() => []),
     fetch("engine/engine.js").then((r) => r.text()),
+    fetch("engine/words.js").then((r) => r.text()),
   ]);
-  briefs = Object.fromEntries(b.map((x) => [x.id, x]));
+  briefs = Object.fromEntries([...b, ...b2].map((x) => [x.id, x]));
   engineSrc = eng.replace(/^export /gm, "");
+  wordsSrc = words.replace(/^export /gm, "");
   // Keep a stable blind order between reloads; new games are appended.
   let order = store.get("order", []).filter((p) => list.some((g) => g.path === p));
   for (const g of shuffle(list.filter((g) => !order.includes(g.path)))) order.push(g.path);
@@ -85,7 +89,7 @@ async function load(g) {
   const b = briefs[g.brief];
   document.getElementById("brief").textContent = b
     ? `${b.type.toUpperCase()}: ${b.theme} / ${b.mechanic}`
-    : "Example game (survival: dodge falling rocks)";
+    : "Hand-written example game";
   const src = await fetch(g.path, { cache: "no-store" }).then((r) => r.text());
   const gameSrc = src.replace(/export\s+default/, "window.__game =");
   const esc = (s) => s.replace(/<\/script/gi, "<\\/script");
@@ -94,7 +98,9 @@ async function load(g) {
 <style>body{margin:0;background:#000;color:#ccc;font:13px monospace;text-align:center}canvas{width:512px;height:512px;image-rendering:pixelated;margin-top:8px}</style>
 </head><body><canvas width="128" height="128"></canvas><div id="s">click to focus</div>
 <script>${esc(engineSrc)}
-const eng = createEngine(1234);
+${esc(wordsSrc)}
+const eng = createEngine(1234, { words: WORDS });
+const WATCH_BOT = ${document.getElementById("watchbot").checked};
 Object.assign(window, eng.api);
 <\/script>
 <script>try { ${esc(gameSrc)} } catch (e) { document.getElementById("s").textContent = "LOAD ERROR: " + e.message; }<\/script>
@@ -120,7 +126,11 @@ function loop(now) {
   if (last !== null) acc += Math.min(now - last, 250);
   last = now;
   try {
-    while (acc >= 1000 / 30) { eng.tick(game, held.slice()); acc -= 1000 / 30; }
+    while (acc >= 1000 / 30) {
+      const b = WATCH_BOT && game.bot && game.probe ? normalizeButtons(game.bot(game.probe(), eng.state.frame)) : held.slice();
+      eng.tick(game, b);
+      acc -= 1000 / 30;
+    }
   } catch (e) { err = e.message; }
   blit(); status();
   if (!err) requestAnimationFrame(loop);
@@ -157,6 +167,7 @@ document.getElementById("export").onclick = () => {
   a.download = "ratings.json";
   a.click();
 };
+document.getElementById("watchbot").onchange = () => { if (current) load(current); };
 document.getElementById("reveal").onclick = () => { revealed = !revealed; renderList(); };
 document.getElementById("reshuffle").onclick = () => { store.set("order", []); boot(); };
 renderRatings();

@@ -1,0 +1,660 @@
+{
+  "date": "2026-10-28T05:57:27.132Z",
+  "results": [
+    {
+      "file": "engine/example-game.js",
+      "model": "example",
+      "brief": "example-game",
+      "issues": [],
+      "metrics": {
+        "lines": 86,
+        "bytes": 2681,
+        "type": "survival",
+        "deterministic": true,
+        "idle": {
+          "label": "idle",
+          "seed": 1234,
+          "frames": 238,
+          "finished": true,
+          "finishSeconds": 7.9,
+          "score": 7,
+          "progressMax": 7,
+          "error": null,
+          "violations": 0
+        },
+        "random": [
+          {
+            "label": "random#1",
+            "seed": 1234,
+            "frames": 180,
+            "finished": true,
+            "finishSeconds": 5.97,
+            "score": 5,
+            "progressMax": 6,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#2",
+            "seed": 1234,
+            "frames": 422,
+            "finished": true,
+            "finishSeconds": 14.03,
+            "score": 14,
+            "progressMax": 14,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#3",
+            "seed": 1234,
+            "frames": 176,
+            "finished": true,
+            "finishSeconds": 5.83,
+            "score": 5,
+            "progressMax": 5,
+            "error": null,
+            "violations": 0
+          }
+        ],
+        "bot": [
+          {
+            "label": "bot(seed 1234)",
+            "seed": 1234,
+            "frames": 5400,
+            "finished": false,
+            "finishSeconds": null,
+            "score": 179,
+            "progressMax": 180,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "bot(seed 99)",
+            "seed": 99,
+            "frames": 5400,
+            "finished": false,
+            "finishSeconds": null,
+            "score": 179,
+            "progressMax": 180,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "bot(seed 7)",
+            "seed": 7,
+            "frames": 5400,
+            "finished": false,
+            "finishSeconds": null,
+            "score": 179,
+            "progressMax": 180,
+            "error": null,
+            "violations": 0
+          }
+        ],
+        "search": {
+          "iterations": 2179,
+          "cells": 1960,
+          "finished": true,
+          "finishSeconds": 1.93,
+          "bestProgress": 180,
+          "bestScore": 179
+        },
+        "botScore": 179,
+        "diag": {},
+        "msPerFrame": 0.023,
+        "msPerFrameMax": 0.38
+      },
+      "tests": [
+        {
+          "name": "an idle player dies within 40 s",
+          "pass": true
+        },
+        {
+          "name": "holding left keeps the ship on screen",
+          "pass": true
+        },
+        {
+          "name": "the bot outlives an idle player",
+          "pass": true
+        }
+      ],
+      "stagesDone": [
+        "static",
+        "load",
+        "smoke",
+        "probe",
+        "bot",
+        "determinism",
+        "tests",
+        "search",
+        "verdicts",
+        "diagnostics"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "pass": true
+    },
+    {
+      "file": "engine/example-maze.js",
+      "model": "example",
+      "brief": "example-maze",
+      "issues": [],
+      "metrics": {
+        "lines": 116,
+        "bytes": 3720,
+        "type": "speedrun",
+        "deterministic": true,
+        "idle": {
+          "label": "idle",
+          "seed": 1234,
+          "frames": 5400,
+          "finished": false,
+          "finishSeconds": null,
+          "score": 0,
+          "progressMax": 6,
+          "error": null,
+          "violations": 0
+        },
+        "random": [
+          {
+            "label": "random#1",
+            "seed": 1234,
+            "frames": 5400,
+            "finished": false,
+            "finishSeconds": null,
+            "score": 0,
+            "progressMax": 7,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#2",
+            "seed": 1234,
+            "frames": 5400,
+            "finished": false,
+            "finishSeconds": null,
+            "score": 0,
+            "progressMax": 9,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#3",
+            "seed": 1234,
+            "frames": 5400,
+            "finished": false,
+            "finishSeconds": null,
+            "score": 0,
+            "progressMax": 7,
+            "error": null,
+            "violations": 0
+          }
+        ],
+        "bot": [
+          {
+            "label": "bot(seed 1234)",
+            "seed": 1234,
+            "frames": 388,
+            "finished": true,
+            "finishSeconds": 12.9,
+            "score": 0,
+            "progressMax": 60,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "bot(seed 99)",
+            "seed": 99,
+            "frames": 388,
+            "finished": true,
+            "finishSeconds": 12.9,
+            "score": 0,
+            "progressMax": 60,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "bot(seed 7)",
+            "seed": 7,
+            "frames": 388,
+            "finished": true,
+            "finishSeconds": 12.9,
+            "score": 0,
+            "progressMax": 60,
+            "error": null,
+            "violations": 0
+          }
+        ],
+        "search": {
+          "iterations": 1393,
+          "cells": 395,
+          "finished": true,
+          "finishSeconds": 48.6,
+          "bestProgress": 60,
+          "bestScore": 0
+        },
+        "botFinishSeconds": 12.9,
+        "diag": {},
+        "msPerFrame": 0.094,
+        "msPerFrameMax": 1.12
+      },
+      "tests": [
+        {
+          "name": "holding up-left at the start stays inside the map",
+          "pass": true
+        },
+        {
+          "name": "the bot escapes within 60 s",
+          "pass": true
+        },
+        {
+          "name": "an idle player never finishes",
+          "pass": true
+        }
+      ],
+      "stagesDone": [
+        "static",
+        "load",
+        "smoke",
+        "probe",
+        "bot",
+        "determinism",
+        "tests",
+        "search",
+        "verdicts",
+        "diagnostics"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "pass": true
+    },
+    {
+      "file": "engine/example-word.js",
+      "model": "example",
+      "brief": "example-word",
+      "issues": [],
+      "metrics": {
+        "lines": 109,
+        "bytes": 3901,
+        "type": "highscore",
+        "deterministic": true,
+        "idle": {
+          "label": "idle",
+          "seed": 1234,
+          "frames": 1801,
+          "finished": true,
+          "finishSeconds": 60,
+          "score": 0,
+          "progressMax": 0,
+          "error": null,
+          "violations": 0
+        },
+        "random": [
+          {
+            "label": "random#1",
+            "seed": 1234,
+            "frames": 1801,
+            "finished": true,
+            "finishSeconds": 60,
+            "score": 0,
+            "progressMax": 0,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#2",
+            "seed": 1234,
+            "frames": 1801,
+            "finished": true,
+            "finishSeconds": 60,
+            "score": 0,
+            "progressMax": 0,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#3",
+            "seed": 1234,
+            "frames": 1801,
+            "finished": true,
+            "finishSeconds": 60,
+            "score": 0,
+            "progressMax": 0,
+            "error": null,
+            "violations": 0
+          }
+        ],
+        "bot": [
+          {
+            "label": "bot(seed 1234)",
+            "seed": 1234,
+            "frames": 1801,
+            "finished": true,
+            "finishSeconds": 60,
+            "score": 170,
+            "progressMax": 170,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "bot(seed 99)",
+            "seed": 99,
+            "frames": 1801,
+            "finished": true,
+            "finishSeconds": 60,
+            "score": 243,
+            "progressMax": 243,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "bot(seed 7)",
+            "seed": 7,
+            "frames": 1801,
+            "finished": true,
+            "finishSeconds": 60,
+            "score": 97,
+            "progressMax": 97,
+            "error": null,
+            "violations": 0
+          }
+        ],
+        "search": {
+          "iterations": 1369,
+          "cells": 264,
+          "finished": false,
+          "finishSeconds": null,
+          "bestProgress": 52,
+          "bestScore": 52
+        },
+        "botScore": 170,
+        "diag": {},
+        "msPerFrame": 0.023,
+        "msPerFrameMax": 1.66
+      },
+      "tests": [
+        {
+          "name": "idle scores zero and the game ends at 60 s",
+          "pass": true
+        },
+        {
+          "name": "the bot finds several words",
+          "pass": true
+        },
+        {
+          "name": "submitting one letter is rejected",
+          "pass": true
+        }
+      ],
+      "stagesDone": [
+        "static",
+        "load",
+        "smoke",
+        "probe",
+        "bot",
+        "determinism",
+        "tests",
+        "search",
+        "verdicts",
+        "diagnostics"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "pass": true
+    },
+    {
+      "file": "out/gemini-flash-latest/b01.js",
+      "model": "gemini-flash-latest",
+      "brief": "b01",
+      "issues": [
+        {
+          "severity": "error",
+          "check": "banned",
+          "message": "Math.sin: use the engine's sin()",
+          "line": 222,
+          "code": "  220 |       if (f.type === 3) {\r\n  221 |         // Squids dart in pulses\r\n> 222 |         const jet = Math.max(0, Math.sin(frame() * 0.12 + f.phase));\r\n  223 |         f.x += f.vx + f.dir * jet * 0.9;\r\n  224 |       } else {\r",
+          "times": 8
+        },
+        {
+          "severity": "error",
+          "check": "contract",
+          "message": "probe() is missing, so the harness can't see the game state"
+        },
+        {
+          "severity": "error",
+          "check": "contract",
+          "message": "bot() is missing, so nobody shows the game can be played well"
+        },
+        {
+          "severity": "warn",
+          "check": "tests",
+          "message": "no self-tests; add tests for the risks in your design"
+        },
+        {
+          "severity": "warn",
+          "check": "engine:printClipped",
+          "message": "text was cut off at the screen edge (at most 32 characters per line; use printc/textw) (116×, first at frame 180 in draw: {\"frame\":180,\"phase\":\"draw\",\"text\":\"FULL X2!\",\"x\":100,\"y\":33})"
+        }
+      ],
+      "metrics": {
+        "lines": 580,
+        "bytes": 16074,
+        "type": "highscore",
+        "deterministic": true,
+        "idle": {
+          "label": "idle",
+          "seed": 1234,
+          "frames": 1800,
+          "finished": true,
+          "finishSeconds": 59.97,
+          "score": 0,
+          "progressMax": null,
+          "error": null,
+          "violations": 0
+        },
+        "random": [
+          {
+            "label": "random#1",
+            "seed": 1234,
+            "frames": 1800,
+            "finished": true,
+            "finishSeconds": 59.97,
+            "score": 905,
+            "progressMax": null,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#2",
+            "seed": 1234,
+            "frames": 1800,
+            "finished": true,
+            "finishSeconds": 59.97,
+            "score": 659,
+            "progressMax": null,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#3",
+            "seed": 1234,
+            "frames": 1800,
+            "finished": true,
+            "finishSeconds": 59.97,
+            "score": 757,
+            "progressMax": null,
+            "error": null,
+            "violations": 0
+          }
+        ],
+        "bot": [],
+        "search": {
+          "iterations": 4072,
+          "cells": 28,
+          "finished": false,
+          "finishSeconds": null,
+          "bestProgress": 52,
+          "bestScore": 52
+        },
+        "botScore": null,
+        "diag": {
+          "printClipped": {
+            "count": 116,
+            "first": {
+              "frame": 180,
+              "phase": "draw",
+              "text": "FULL X2!",
+              "x": 100,
+              "y": 33
+            }
+          }
+        },
+        "msPerFrame": 0.294,
+        "msPerFrameMax": 4.48
+      },
+      "tests": [],
+      "stagesDone": [
+        "static",
+        "load",
+        "smoke",
+        "probe",
+        "bot",
+        "determinism",
+        "tests",
+        "search",
+        "verdicts",
+        "diagnostics"
+      ],
+      "errors": 3,
+      "warnings": 2,
+      "pass": false
+    },
+    {
+      "file": "out/gemini-flash-latest/b03.js",
+      "model": "gemini-flash-latest",
+      "brief": "b03",
+      "issues": [
+        {
+          "severity": "error",
+          "check": "banned",
+          "message": "Math.cos: use the engine's cos()",
+          "line": 150,
+          "code": "  148 |     const a = rnd(6.28);\r\n  149 |     const spd = 0.5 + rnd(2.5);\r\n> 150 |     spawnParticle(px, py, Math.cos(a) * spd, Math.sin(a) * spd, rnd() < 0.5 ? 7 : 8, 20);\r\n  151 |   }\r\n  152 |   px = startX;\r",
+          "times": 2
+        },
+        {
+          "severity": "error",
+          "check": "banned",
+          "message": "Math.sin: use the engine's sin()",
+          "line": 150,
+          "code": "  148 |     const a = rnd(6.28);\r\n  149 |     const spd = 0.5 + rnd(2.5);\r\n> 150 |     spawnParticle(px, py, Math.cos(a) * spd, Math.sin(a) * spd, rnd() < 0.5 ? 7 : 8, 20);\r\n  151 |   }\r\n  152 |   px = startX;\r",
+          "times": 2
+        },
+        {
+          "severity": "error",
+          "check": "contract",
+          "message": "probe() is missing, so the harness can't see the game state"
+        },
+        {
+          "severity": "error",
+          "check": "contract",
+          "message": "bot() is missing, so nobody shows the game can be played well"
+        },
+        {
+          "severity": "warn",
+          "check": "own-collision",
+          "message": "this looks like a tile map, but it isn't loaded with mload(); use mload() and move() so walls work and the harness can check them",
+          "line": 58,
+          "code": "   56 |   ],\r\n   57 |   // Stage 3: Core of Frost (3 Keys, High Speed Chaos)\r\n>  58 |   [\r\n   59 |     \"################\",\r\n   60 |     \"#P...#....#...K#\",\r"
+        },
+        {
+          "severity": "warn",
+          "check": "tests",
+          "message": "no self-tests; add tests for the risks in your design"
+        }
+      ],
+      "metrics": {
+        "lines": 560,
+        "bytes": 15507,
+        "type": "speedrun",
+        "deterministic": true,
+        "idle": {
+          "label": "idle",
+          "seed": 1234,
+          "frames": 5400,
+          "finished": false,
+          "finishSeconds": null,
+          "score": 0,
+          "progressMax": null,
+          "error": null,
+          "violations": 0
+        },
+        "random": [
+          {
+            "label": "random#1",
+            "seed": 1234,
+            "frames": 5400,
+            "finished": false,
+            "finishSeconds": null,
+            "score": 0,
+            "progressMax": null,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#2",
+            "seed": 1234,
+            "frames": 5400,
+            "finished": false,
+            "finishSeconds": null,
+            "score": 0,
+            "progressMax": null,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#3",
+            "seed": 1234,
+            "frames": 5400,
+            "finished": false,
+            "finishSeconds": null,
+            "score": 0,
+            "progressMax": null,
+            "error": null,
+            "violations": 0
+          }
+        ],
+        "bot": [],
+        "search": {
+          "iterations": 559,
+          "cells": 133,
+          "finished": true,
+          "finishSeconds": 17.93,
+          "bestProgress": 0,
+          "bestScore": 0
+        },
+        "botFinishSeconds": null,
+        "diag": {},
+        "msPerFrame": 0.237,
+        "msPerFrameMax": 1.02
+      },
+      "tests": [],
+      "stagesDone": [
+        "static",
+        "load",
+        "smoke",
+        "probe",
+        "bot",
+        "determinism",
+        "tests",
+        "search",
+        "verdicts",
+        "diagnostics"
+      ],
+      "errors": 4,
+      "warnings": 2,
+      "pass": false
+    }
+  ]
+}

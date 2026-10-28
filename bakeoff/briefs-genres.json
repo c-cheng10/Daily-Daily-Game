@@ -1,0 +1,10 @@
+[
+  { "id": "g01", "type": "highscore", "genre": "word", "theme": "space station", "mechanic": "catch falling letters to spell words" },
+  { "id": "g02", "type": "speedrun", "genre": "puzzle", "theme": "toy factory", "mechanic": "push crates onto switches to open the exit" },
+  { "id": "g03", "type": "survival", "genre": "tower defense", "theme": "mushroom village", "mechanic": "place a limited number of towers along a winding path" },
+  { "id": "g04", "type": "highscore", "genre": "card", "theme": "pirate tavern", "mechanic": "draw cards and push your luck before you bust" },
+  { "id": "g05", "type": "speedrun", "genre": "word puzzle", "theme": "wizard's tower", "mechanic": "change one letter at a time to turn the start word into the goal word" },
+  { "id": "g06", "type": "highscore", "genre": "sports", "theme": "mini golf on the moon", "mechanic": "aim with a swinging arrow and time the power meter" },
+  { "id": "g07", "type": "survival", "genre": "rhythm", "theme": "night club", "mechanic": "press the right button as notes reach the line; misses cost health" },
+  { "id": "g08", "type": "highscore", "genre": "strategy", "theme": "ant colony", "mechanic": "assign ants to gather food or defend the nest each round" }
+]

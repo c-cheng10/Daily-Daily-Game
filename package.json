@@ -3,8 +3,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "gen": "node --env-file=.env bakeoff/gen.mjs",
+    "build": "node --env-file-if-exists=.env bakeoff/build.mjs",
+    "gen": "node --env-file-if-exists=.env bakeoff/build.mjs --oneshot",
     "check": "node bakeoff/check.mjs",
-    "play": "node bakeoff/serve.mjs"
+    "play": "node bakeoff/serve.mjs",
+    "words": "node bakeoff/engine/build-words.mjs",
+    "test": "node bakeoff/harness/selftest.mjs"
+  },
+  "dependencies": {
+    "acorn": "^8.19.0",
+    "acorn-walk": "^8.3.5"
+  },
+  "devDependencies": {
+    "wordlist-english": "^1.2.1"
   }
 }
