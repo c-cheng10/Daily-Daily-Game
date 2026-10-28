@@ -23,7 +23,27 @@
     <a href="#/archive" data-tab="archive">Archive</a>
     <a href="#/how" data-tab="how">How to</a>
   </nav>
+  <div class="acct" id="acct"></div>
 </header>
+
+<dialog id="auth" aria-labelledby="auth-title">
+  <form method="dialog" class="auth-close"><button class="x" aria-label="Close">&times;</button></form>
+  <h2 id="auth-title">Join the leaderboard</h2>
+  <p class="auth-why" id="auth-why"></p>
+  <div class="auth-tabs" role="tablist">
+    <button type="button" role="tab" data-mode="signup">Sign up</button>
+    <button type="button" role="tab" data-mode="login">Sign in</button>
+  </div>
+  <form id="auth-form" novalidate>
+    <label>Email<input name="email" type="email" autocomplete="email" required></label>
+    <label data-only="signup">Username<input name="username" autocomplete="username" maxlength="12" required>
+      <small>3-12 letters, numbers or _. This is what shows on the leaderboard.</small></label>
+    <label>Password<input name="password" type="password" autocomplete="current-password" minlength="8" required>
+      <small data-only="signup">At least 8 characters.</small></label>
+    <p class="auth-err" id="auth-err" role="alert"></p>
+    <button class="btn warn" type="submit" id="auth-submit">Create account</button>
+  </form>
+</dialog>
 
 <main id="view" tabindex="-1"></main>
 

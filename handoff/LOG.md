@@ -4,6 +4,23 @@ Newest first. One entry per session: date, who, what changed, what's next.
 
 ---
 
+## 2026-10-28 (4) — c-cheng10 (Claude), branch `website`
+
+**Done**
+- Replaced the free-text leaderboard names with accounts: email + unique username + password (scrypt), HttpOnly SameSite cookie sessions (30 days). Code in `site/lib/users.mjs`; API `/api/signup`, `/api/login`, `/api/logout`, `/api/me`.
+- Posting a score now needs an account. Finishing a run signed out opens a sign-up dialog, and the run posts as soon as you sign up or sign in. Leaderboard shows the username. "Your best" now comes from the server per account.
+- Test account seeding: `node site/seed.mjs` reads `site/seed/test-accounts.json`.
+
+**Verified**
+- API: signed-out submit → 401, duplicate username → 400, bad email → 400, wrong password → 401, login + authed submit → verified and ranked, non-JSON POST → 400, passwords stored hashed only.
+- Browser: the sign-up prompt appears after a signed-out run; signing in posts the pending run; header shows @username; no horizontal scroll at 375 px.
+
+**Not done**
+- No email verification or password reset (needs an email provider). Anyone can sign up with an address they don't own.
+- Old anonymous scores were wiped (local test data only).
+
+---
+
 ## 2026-10-28 (3) — c-cheng10 (Claude), branch `website`
 
 **Done**

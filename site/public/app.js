@@ -5,15 +5,9 @@ const view = document.getElementById("view");
 const $ = (sel, el = document) => el.querySelector(sel);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-const store = {
-  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
-};
-function playerId() {
-  let id = store.get("playerId", null);
-  if (!id) { id = crypto.randomUUID(); store.set("playerId", id); }
-  return id;
-}
+// Signed-in account ({ username, email, bests }) or null.
+let me = null;
+const bests = () => (me ? me.bests : {});
 
 const GOALS = {
   highscore: "Score as many points as you can.",
@@ -55,7 +49,7 @@ async function route() {
 async function playPage(date) {
   const day = dayOf(date);
   const isLatest = date === latest().date;
-  const best = store.get("best", {})[date];
+  const best = bests()[date];
   view.innerHTML = `
   <section class="play">
     <div class="cart">
@@ -155,58 +149,55 @@ async function playPage(date) {
   });
 
   cleanup = () => { removeEventListener("keydown", kd); removeEventListener("keyup", ku); player?.destroy(); };
-  renderBoard($("#mini"), await api(`/api/leaderboard/${date}?player=${playerId()}`).catch(() => null), 10);
+  renderBoard($("#mini"), await api(`/api/leaderboard/${date}`).catch(() => null), 10);
 }
 
 function showResult(day, run, restart) {
   const box = $("#result");
   if (!box) return;
-  const name = store.get("name", "");
   box.hidden = false;
   box.innerHTML = `
     <h2>${day.type === "speedrun" ? "Cleared!" : "Game over"}</h2>
     <div class="score">${fmt(day.type, run.value)}</div>
-    <div class="verdict" id="verdict">${name ? "Verifying your run&hellip;" : "Enter a name to post your score."}</div>
-    <form id="nameform" ${name ? "hidden" : ""}>
-      <input id="name" maxlength="10" placeholder="YOUR NAME" autocomplete="nickname" value="${esc(name)}" aria-label="Your name">
-      <button class="btn warn" type="submit">Post</button>
-    </form>
-    <div class="row">
+    <div class="verdict" id="verdict"></div>
+    <div class="row" id="join" hidden>
+      <button class="btn warn" id="join-up" type="button">Create account</button>
+      <button class="btn alt" id="join-in" type="button">Sign in</button>
+    </div>
+    <div class="row" style="margin-top:10px">
       <button class="btn" id="again" type="button">Play again</button>
       <button class="btn alt" id="share" type="button">Share</button>
-      ${name ? `<button class="btn alt" id="rename" type="button">Change name</button>` : ""}
     </div>`;
   $("#again").onclick = restart;
-  $("#rename")?.addEventListener("click", () => { $("#nameform").hidden = false; $("#name").focus(); });
+  const join = (mode) => openAuth(mode, "Sign up to post this run to the global leaderboard.", () => post(day, run));
+  $("#join-up").onclick = () => join("signup");
+  $("#join-in").onclick = () => join("login");
   $("#share").onclick = async () => {
     const text = `Daily Daily Game #${day.number}: ${day.title}\n${day.type === "speedrun" ? "Time" : "Score"}: ${fmt(day.type, run.value)}\n${location.origin}/#/play/${day.date}`;
     try { await navigator.clipboard.writeText(text); $("#share").textContent = "Copied!"; } catch { prompt("Copy this:", text); }
   };
-  $("#nameform").onsubmit = (e) => {
-    e.preventDefault();
-    const n = $("#name").value.toUpperCase().replace(/[^A-Z0-9 _-]/g, "").trim().slice(0, 10);
-    if (!n) { $("#verdict").textContent = "Letters and numbers only."; return; }
-    store.set("name", n);
-    $("#nameform").hidden = true;
-    post(day, run, n);
-  };
-  if (name) post(day, run, name);
-  else $("#name").focus();
+  if (me) post(day, run);
+  else {
+    $("#verdict").textContent = "Create a free account to post your score.";
+    $("#join").hidden = false;
+    join("signup");
+  }
 }
 
-async function post(day, run, name) {
+async function post(day, run) {
   const verdict = $("#verdict");
+  if (!verdict) return;
+  $("#join").hidden = true;
   verdict.textContent = "Verifying your run…";
   try {
     const r = await api("/api/submit", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ date: day.date, playerId: playerId(), name, inputs: toBase64(run.inputs) }),
+      body: JSON.stringify({ date: day.date, inputs: toBase64(run.inputs) }),
     });
-    const bests = store.get("best", {});
-    if (better(day.type, r.verified, bests[day.date])) { bests[day.date] = r.verified; store.set("best", bests); }
+    if (me && better(day.type, r.verified, me.bests[day.date])) me.bests[day.date] = r.verified;
     const hud = $("#hudbest");
-    if (hud) hud.textContent = `BEST ${fmt(day.type, bests[day.date])}`;
+    if (hud) hud.textContent = `BEST ${fmt(day.type, bests()[day.date])}`;
     const rank = r.board.you ? `#${r.board.you.rank} of ${r.board.total}` : "";
     verdict.textContent = r.newBest ? `Verified. New personal best! You're ${rank}.` : `Verified. Your best is still ${fmt(day.type, r.board.you.value)} (${rank}).`;
     const mini = $("#mini");
@@ -214,6 +205,72 @@ async function post(day, run, name) {
   } catch (e) {
     verdict.innerHTML = `<span class="err">${esc(e.message)}</span>`;
   }
+}
+
+// ---------- Accounts ----------
+
+function renderAccount() {
+  const el = $("#acct");
+  if (me) {
+    el.innerHTML = `<span class="who" title="${esc(me.email)}">@${esc(me.username)}</span><button class="link" id="signout" type="button">Sign out</button>`;
+    $("#signout").onclick = async () => {
+      await api("/api/logout", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }).catch(() => {});
+      me = null;
+      renderAccount();
+      route();
+    };
+  } else {
+    el.innerHTML = `<button class="btn warn small" id="signin" type="button">Sign in</button>`;
+    $("#signin").onclick = () => openAuth("login");
+  }
+}
+
+let authDone = null;
+function openAuth(mode, why = "Sign up to post your scores to the global leaderboard.", onDone = null) {
+  const dlg = $("#auth");
+  authDone = onDone;
+  $("#auth-why").textContent = why;
+  setAuthMode(mode);
+  if (!dlg.open) dlg.showModal();
+  $("#auth-form [name=email]").focus();
+}
+
+function setAuthMode(mode) {
+  const form = $("#auth-form");
+  form.dataset.mode = mode;
+  document.querySelectorAll(".auth-tabs button").forEach((b) => b.setAttribute("aria-selected", b.dataset.mode === mode));
+  form.querySelectorAll("[data-only=signup]").forEach((el) => { el.hidden = mode !== "signup"; });
+  form.username.required = mode === "signup";
+  form.password.autocomplete = mode === "signup" ? "new-password" : "current-password";
+  $("#auth-title").textContent = mode === "signup" ? "Create your account" : "Welcome back";
+  $("#auth-submit").textContent = mode === "signup" ? "Create account" : "Sign in";
+  $("#auth-err").textContent = "";
+}
+
+function setupAuth() {
+  document.querySelectorAll(".auth-tabs button").forEach((b) => { b.onclick = () => setAuthMode(b.dataset.mode); });
+  $("#auth-form").onsubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target, mode = form.dataset.mode, err = $("#auth-err");
+    const body = { email: form.email.value, password: form.password.value };
+    if (mode === "signup") body.username = form.username.value;
+    $("#auth-submit").disabled = true;
+    err.textContent = "";
+    try {
+      me = await api(`/api/${mode}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      form.reset();
+      $("#auth").close();
+      renderAccount();
+      const done = authDone;
+      authDone = null;
+      if (done) done();
+      else route();
+    } catch (ex) {
+      err.textContent = ex.message;
+    } finally {
+      $("#auth-submit").disabled = false;
+    }
+  };
 }
 
 function toBase64(bytes) {
@@ -348,13 +405,13 @@ async function leaderboardPage(date) {
       <div id="board"><p class="empty">Loading&hellip;</p></div>
     </div>
     <p class="row" style="margin-top:16px"><a class="btn" href="#/play/${date}">Play this game</a></p>`;
-  renderBoard($("#board"), await api(`/api/leaderboard/${date}?player=${playerId()}`).catch(() => null), 50);
+  renderBoard($("#board"), await api(`/api/leaderboard/${date}`).catch(() => null), 50);
 }
 
 // ---------- Archive ----------
 
 function archivePage() {
-  const best = store.get("best", {});
+  const best = bests();
   view.innerHTML = `
     <div class="pagehead"><h1>Archive</h1><p>Every daily game so far. Old leaderboards stay open.</p></div>
     <div class="grid">${[...days].reverse().map((d) => `
@@ -362,7 +419,7 @@ function archivePage() {
         <div class="num">#${d.number} &middot; ${fmtDate(d.date)}</div>
         <h3>${esc(d.title)}</h3>
         <span class="badge ${d.type}">${d.type}</span>
-        <div class="best ${best[d.date] == null ? "none" : ""}">${best[d.date] == null ? "NOT PLAYED" : "YOUR BEST " + fmt(d.type, best[d.date])}</div>
+        <div class="best ${best[d.date] == null ? "none" : ""}">${best[d.date] != null ? "YOUR BEST " + fmt(d.type, best[d.date]) : me ? "NOT PLAYED" : "SIGN IN TO TRACK"}</div>
       </a>`).join("")}
     </div>`;
 }
@@ -391,6 +448,7 @@ function howPage() {
     </div>
     <div class="panel">
       <h2>The leaderboard is fair</h2>
+      <p>Anyone can play. To post scores, create a free account with your email and a unique username; that username is what shows on the leaderboard.</p>
       <p>When you finish, your button presses are sent to the server, which replays the whole game itself and works out your score. You can play as many times as you like; only your best run counts.</p>
     </div>
   </div>`;
@@ -408,8 +466,10 @@ function tickCountdown() {
 async function boot() {
   tickCountdown();
   setInterval(tickCountdown, 1000);
+  setupAuth();
   try {
-    ({ days, today } = await api("/api/days"));
+    [{ days, today }, me] = await Promise.all([api("/api/days"), api("/api/me").catch(() => null)]);
+    renderAccount();
   } catch (e) {
     view.innerHTML = `<p class="msg err">Couldn't reach the server. ${esc(e.message)}</p>`;
     return;
