@@ -5,7 +5,8 @@ import { fileURLToPath } from "node:url";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
-const EXAMPLES = ["engine/example-game.js", "engine/example-maze.js", "engine/example-word.js"];
+// Prompt examples: action, generated levels, typing, logic puzzle. (example-maze and example-word are test fixtures.)
+const EXAMPLES = ["engine/example-game.js", "engine/example-cave.js", "engine/example-type.js", "engine/example-logic.js"];
 
 const CHECKLIST = `- Collision: use move() / boxhit() / overlap() from the engine. Never write your own tile-collision loop.
 - Every level can be completed. The player can never leave the map, pass through walls, or get stuck forever (no softlocks). Trace the route on every map.
@@ -16,7 +17,9 @@ const CHECKLIST = `- Collision: use move() / boxhit() / overlap() from the engin
 - An idle player must not win or score well. Survival: an idle player dies. Speedrun: a good player finishes in 20-90 s. Highscore/survival rounds end within about 2 minutes for most players.
 - finish() is called exactly when the run ends, and the end screen shows the result.
 - draw() only draws. All game logic lives in update().
-- btnp() for one-shot actions (jump, shoot, menu choice, typing a letter); btn() for held movement.
+- btnp() for one-shot actions (jump, shoot, menu choice, typing a letter); btn() for held movement. Text entry uses keyboard().
+- Generated content (levels, puzzles, deals, word sets): write your own generator for your game and your own solver for your game's rules (a puzzle() spec whose apply() calls the same rule function update() uses; reqs.check for movement that isn't plain walking). Keep only candidates the solver accepts (makepuzzle/makelevel), have a known-good fallback, and export puzzle()/level().
+- Words and facts come from the engine (wordlist, categories), not from memory. No offensive words anywhere.
 - probe() is cheap and JSON-safe and reports progress honestly; bot() plays well and never changes game state; tests cover the risks you listed.
 - No placeholders, TODOs or unfinished features. The whole file, every time.`;
 
@@ -33,7 +36,7 @@ An automated harness will test your game before anyone plays it: it runs your se
    - goal and end: how the player wins or loses, and exactly when finish() is called
    - scoring: the exact formula (for speedrun: what the timer measures)
    - difficulty: what a new player sees in the first 5 seconds, and how it ramps over about 2 minutes
-   - layout check: if there are levels or maps, trace the route from the start to every goal, tile by tile, and confirm nothing (walls, hazards, closed doors) blocks it
+   - layout check: if there are hand-made levels or maps, trace the route from the start to every goal, tile by tile, and confirm nothing (walls, hazards, closed doors) blocks it. If anything is generated (levels, puzzles, deals, word sets): the generator you will write, the solver that checks each one with the game's real rules (moves / apply / goal), the requirements every one must meet (they become reqs / accept), the difficulty target, and the fallback
    - probe and bot: the probe() fields, and the bot's strategy
    - risks: the 3 parts most likely to be buggy, and how the code and the tests guard against them
 2. Then write the complete game in one \`\`\`js code block.
@@ -73,6 +76,7 @@ Simulate it in your head, step by step:
 3. Each way the run can end: is finish() called, is the end screen right, does draw() still work after finish()?
 4. init() called a second time after a full game: is everything reset?
 5. Your bot playing a whole run, and each of your tests: would they pass? Are your probe() fields right?
+6. Generated content: could your generator ever produce a level or puzzle that is unsolvable, has several answers, or is trivial? Does your solver use exactly the same rules as update()? What happens when generation fails?
 
 Then go through the quality checklist item by item.
 

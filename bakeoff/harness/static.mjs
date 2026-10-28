@@ -1,6 +1,7 @@
 // Static checks on a game's source, before anything runs: parse errors, banned APIs, unknown globals, module shape.
 import * as acorn from "acorn";
 import * as walk from "acorn-walk";
+import { blockedIn } from "./blocklist.mjs";
 
 export const MAX_BYTES = 60000;
 
@@ -67,6 +68,9 @@ export function staticCheck(src, apiNames) {
         const alt = prop === "random" ? "use rnd()" : ["sin", "cos", "atan2"].includes(prop) ? `use the engine's ${prop}()` : "not deterministic across devices; avoid it or use the engine's sin/cos/atan2/sqrt";
         add("error", "banned", `Math.${prop}: ${alt}`, node.loc.start.line);
       }
+    } else if ((type === "Literal" && typeof node.value === "string") || type === "TemplateElement") {
+      const bad = blockedIn(type === "Literal" ? node.value : node.value.cooked ?? "");
+      if (bad.length) add("error", "offensive", `offensive word in the game's text: ${bad.map((w) => w[0] + "*".repeat(w.length - 1)).join(", ")}. Daily games are for everyone; remove it`, node.loc.start.line);
     } else if (type === "BinaryExpression" && node.operator === "**") {
       const r = node.right;
       if (!(r.type === "Literal" && Number.isInteger(r.value) && r.value >= 0 && r.value <= 4)) {

@@ -43,7 +43,7 @@ const store = {
   get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
-let games = [], briefs = {}, current = null, engineSrc = "", wordsSrc = "", revealed = false;
+let games = [], briefs = {}, current = null, engineSrc = "", wordsSrc = "", catsSrc = "", bigSrc = "", revealed = false;
 let ratings = store.get("ratings", {});
 
 function shuffle(a) {
@@ -52,16 +52,20 @@ function shuffle(a) {
 }
 
 async function boot() {
-  const [list, b, b2, eng, words] = await Promise.all([
+  const [list, b, b2, eng, words, cats, big] = await Promise.all([
     fetch("/api/games").then((r) => r.json()),
     fetch("briefs.json").then((r) => r.json()),
     fetch("briefs-genres.json").then((r) => r.json()).catch(() => []),
     fetch("engine/engine.js").then((r) => r.text()),
     fetch("engine/words.js").then((r) => r.text()),
+    fetch("engine/categories.js").then((r) => r.text()),
+    fetch("engine/categories-big.js").then((r) => r.text()),
   ]);
   briefs = Object.fromEntries([...b, ...b2].map((x) => [x.id, x]));
   engineSrc = eng.replace(/^export /gm, "");
   wordsSrc = words.replace(/^export /gm, "");
+  catsSrc = cats.replace(/^export /gm, "");
+  bigSrc = big.replace(/^export /gm, "");
   // Keep a stable blind order between reloads; new games are appended.
   let order = store.get("order", []).filter((p) => list.some((g) => g.path === p));
   for (const g of shuffle(list.filter((g) => !order.includes(g.path)))) order.push(g.path);
@@ -96,10 +100,14 @@ async function load(g) {
   document.getElementById("frame").srcdoc = `<!doctype html><html><head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
 <style>body{margin:0;background:#000;color:#ccc;font:13px monospace;text-align:center}canvas{width:512px;height:512px;image-rendering:pixelated;margin-top:8px}</style>
-</head><body><canvas width="128" height="128"></canvas><div id="s">click to focus</div>
+</head><body><canvas width="128" height="128"></canvas><div id="s">click to focus</div><pre id="share" style="font:14px sans-serif"></pre>
 <script>${esc(engineSrc)}
 ${esc(wordsSrc)}
-const eng = createEngine(1234, { words: WORDS });
+${esc(catsSrc)}
+${esc(bigSrc)}
+// Today's seed (UTC date), as the site will use it.
+const SEED = dailySeed(new Date().toISOString().slice(0, 10));
+const eng = createEngine(SEED, { words: WORDS, categories: CATEGORIES, bigCategories: BIG_CATEGORIES });
 const WATCH_BOT = ${document.getElementById("watchbot").checked};
 Object.assign(window, eng.api);
 <\/script>
@@ -121,6 +129,8 @@ function status() {
   document.getElementById("s").textContent = err ? "ERROR: " + err
     : game.type + "  |  " + (game.type === "speedrun" ? "time " + (s.frame / 30).toFixed(2) + "s" : "score " + s.score)
       + (s.finished ? "  |  FINISHED: " + (game.type === "speedrun" ? r.toFixed(2) + "s" : r) + "  (R to restart)" : "");
+  const sh = document.getElementById("share");
+  if (s.finished && game.share && !sh.textContent) { try { sh.textContent = "Share:\\n" + game.share(); } catch (e) { sh.textContent = "share() error: " + e.message; } }
 }
 function loop(now) {
   if (last !== null) acc += Math.min(now - last, 250);

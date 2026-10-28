@@ -5,6 +5,9 @@
 import vm from "node:vm";
 import { createEngine } from "../engine/engine.js";
 import { WORDS } from "../engine/words.js";
+import { CATEGORIES } from "../engine/categories.js";
+import { BIG_CATEGORIES } from "../engine/categories-big.js";
+import { isBlocked } from "./blocklist.mjs";
 
 export const API_NAMES = Object.keys(createEngine(0).api);
 
@@ -28,7 +31,7 @@ export function loadGame(src, { timeoutMs = 3000 } = {}) {
     try { return vm.runInContext("__host()", ctx, { timeout: ms }); } finally { ctx.__host = null; }
   };
 
-  const newEngine = (seed) => (holder.eng = createEngine(seed, { words: WORDS }));
+  const newEngine = (seed) => (holder.eng = createEngine(seed, { words: WORDS, categories: CATEGORIES, bigCategories: BIG_CATEGORIES, blocked: isBlocked }));
   return { game, ctx, guard, newEngine, holder };
 }
 

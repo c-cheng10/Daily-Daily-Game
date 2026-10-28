@@ -4,6 +4,8 @@ import { staticCheck, codeAround } from "./static.mjs";
 import { loadGame, describeError, API_NAMES } from "./sandbox.mjs";
 import { play, explore, idle, randomInput, designerBot, replayInputs, compressInputs, jsonOf, MAX_FRAMES } from "./runs.mjs";
 import { normalizeButtons } from "../engine/engine.js";
+import { checkGenerated } from "./generated.mjs";
+import { blockedIn } from "./blocklist.mjs";
 
 const TYPES = ["highscore", "speedrun", "survival"];
 const SEEDS = [1234, 99, 7];
@@ -148,6 +150,37 @@ export function evaluateSource(src, { brief, exploreMs = 8000, progress = () => 
     for (const t of tests) if (!t.pass) add("error", "self-test", `self-test "${t.name}" failed: ${t.message}`, { line: t.line, repro: t.repro });
   }
 
+  // 7b. Generated content: solve the game's puzzle() and check its level() against its own reqs, on every seed and level.
+  stage("generated");
+  for (const k of ["puzzle", "level"]) if (g[k] !== undefined && typeof g[k] !== "function") add("error", "contract", `${k} must be a function that returns the current ${k}`);
+  if (typeof g.puzzle === "function" || typeof g.level === "function") {
+    const gen = checkGenerated(G, SEEDS);
+    for (const i of gen.issues) add(i.severity, i.check, i.message, { ...(i.line ? { line: i.line } : {}), ...(i.detail ? { detail: i.detail } : {}) });
+    if (gen.stats.puzzle.length) metrics.puzzle = gen.stats.puzzle;
+    if (gen.stats.level.length) metrics.level = gen.stats.level;
+  } else if (/puzzle|logic/i.test(`${brief?.genre ?? ""} ${brief?.mechanic ?? ""}`)) {
+    add("warn", "puzzle", "this is a logic puzzle but there is no puzzle() export, so nobody checked that each puzzle can be solved (and has one answer); generate puzzles with solve()/makepuzzle() and export puzzle()");
+  }
+  if (/\b(gen(maze|cave|rooms)|makelevel)\s*\(/.test(src) && typeof g.level !== "function") {
+    add("warn", "level", "the game generates levels but has no level() export, so the harness can't check them against your requirements; export level() returning {rows, reqs}");
+  }
+
+  // 7c. Share text: what the player copies after the run. Must be short, clean and spoiler-free.
+  if (typeof g.share === "function") {
+    for (const r of botRuns.filter((x) => !x.error && x.finished)) {
+      if (r.shareError) { add("error", "share", `share() threw: ${r.shareError}`); break; }
+      const s = r.share;
+      if (typeof s !== "string" || !s.trim()) { add("error", "share", `share() returned ${jsonOf(s, 100)}; it must return a non-empty string`); break; }
+      if (s.length > 280 || s.split("\n").length > 10) add("warn", "share", `the share text is ${s.length} characters and ${s.split("\n").length} lines; keep it under 280 characters and 10 lines`);
+      const bad = blockedIn(s);
+      if (bad.length) add("error", "offensive", "the share text contains an offensive word");
+      const secret = r.probe?.secret;
+      if (typeof secret === "string" && secret.length >= 3 && s.toUpperCase().includes(secret.toUpperCase())) add("error", "share", `the share text gives away the answer (probe().secret = "${secret}"); share the result, not the solution`);
+      metrics.share = s;
+      break;
+    }
+  }
+
   // 8. Search bot: can the harness, knowing nothing about the game, finish it or score?
   stage("search");
   const ex = explore(G, { budgetMs: exploreMs, type, stopOnFinish: type === "speedrun" });
@@ -214,6 +247,10 @@ export function evaluateSource(src, { brief, exploreMs = 8000, progress = () => 
   D("nanArg", "error", "a drawing or move() call got NaN/Infinity; some value in your state is broken");
   D("badScore", "error", "score() got a non-number");
   D("badButton", "error", "btn() was called with an invalid button number (use 0-5)");
+  D("blockedWord", "error", "an offensive word appeared on screen; daily games are for everyone. If it came from the player's typing, reject words that fail isword() (offensive words aren't in the list)");
+  D("makepuzzleFailed", "error", "makepuzzle() never produced an acceptable puzzle; loosen the generator or raise tries, and handle null");
+  D("makelevelFailed", "error", "makelevel() never produced a level that meets your reqs (see problems); loosen the reqs, fix the generator or raise tries, and handle null");
+  D("placeShort", "warn", "place() couldn't find enough tiles that fit (o.on / o.min / o.max)");
   D("badColour", "warn", "a colour outside 0-15 was used");
   D("printClipped", "warn", "text was cut off at the screen edge (at most 32 characters per line; use printc/textw)");
   D("unknownChar", "warn", "print() got characters the font doesn't have");

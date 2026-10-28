@@ -4,6 +4,41 @@ Newest first. One entry per session: date, who, what changed, what's next.
 
 ---
 
+## 2026-10-28 (7) — kenzo-aspuru-takata (Claude)
+
+On branch `harness`; not committed yet.
+
+**Done**
+- Prompt: models are told to write their own generator and their own solver for their game's rules (engine-api.md "Your own generators and solvers", with an ice-sliding example), with the solver's `apply()` calling the same rule function `update()` uses. The design block now asks for the generator, solver, requirements, difficulty target and fallback; the self-review asks whether the generator can produce bad content.
+- Harness: a puzzle spec may give `buttons(m)` (the presses that make move m). The harness plays the solver's solution through the real game from a fresh start and errors (`puzzle-rules`) if the game doesn't count it as solved, which catches solvers whose rules differ from the game. The logic example now has `buttons()`.
+- Cards: `deck`, `deal`, `cardname`, `drawcard` (12x16 with suit sprites), `cardtotal`, `pokerhand` (best of 5-7). `probe().cards` lists every zone and the harness checks no card is duplicated or lost. New fixture `example-cards.js` (higher/lower with poker-hand bonuses). The harness caught 3 bugs in it while I wrote it ("XXX" misses counter flagged as offensive, a label off screen, a 1-second game).
+- Category datasets researched (not integrated): WordNet via npm `wordnet-db` is large and has a permissive license, but its "is-a" lists are noisy even when keeping only each word's main meaning (e.g. CLOCKS and CHESS as herbs, QUEEN as an insect), so it's not safe to use unreviewed; I removed it again. Darius Kazemi's `corpora` (github.com/dariusk/corpora, CC0, JSON lists by topic) is the best curated source, but its npm package only holds a loader, so using it means downloading the GitHub repo (waiting on the dev's OK). The psychology "category norms" (Battig & Montague 1969, Van Overschelde 2004 update) are the gold standard for typical members but have no clear open download.
+- `npm test`: 38/38 cases and 12/12 unit checks.
+- Later in the session (with the dev's OK): imported Corpora. `engine/build-categories.mjs` (`npm run categories -- <corpora>/data`, after downloading the repo tarball from GitHub) turns 53 family-friendly lists into `engine/categories-big.js` (5,590 entries, 72 KB): text cleaned to what the font draws (A-Z, one space, at most 12 characters), offensive words removed, ordinary-word lists checked against SCOWL (drops typos and obscure entries). Skipped: lists about people, drugs, alcohol, diseases, politics, the UK-licensed nationalities list, and MOODS (contained words like "aroused"). Opt-in in the engine (`category(name, { big: true })`); the hand-checked lists stay the default. 38/38 cases, 13/13 unit checks.
+
+---
+
+## 2026-10-28 (6) — kenzo-aspuru-takata (Claude)
+
+On branch `harness`; not committed yet.
+
+**Done**: engine tools for daily-style games, each checked by the harness (see `bakeoff/engine/engine-api.md`).
+- **Puzzle solver**: `solve(p, {max, shortest, limit})` (depth-first solution counting or breadth-first shortest path) and `makepuzzle(make, accept)`. Games describe a logic puzzle as `{start, moves, apply, goal}`, build puzzles by generate-and-solve, and export `puzzle()`. The harness solves it on 3 seeds and at each new level: error if unsolvable, if `unique` and 2+ solutions, if `par` is wrong, or if `apply()` changes its input; warning if the search is too big to check.
+- **Level generators**: `genmaze`, `gencave`, `genrooms`, `place(rows, ch, n, {from, min, max, farthest})`, `checklevel(rows, reqs)` and `makelevel(make, reqs)`. `reqs` are the game's own rules: start, tiles that must be reachable, exit distance, tile counts, open space, a `check(rows)` callback, and a `platform` mode with jump limits. Games export `level()` → `{rows, reqs}`; the harness re-checks every level against those reqs and that it matches the loaded map.
+- **Keyboard**: `keyboard()` on-screen letter grid with `kb.update()/draw()` and bot helpers `kb.press(key)`/`kb.type(word, typed)`, so word games share one tested input and their bots can type.
+- **Offensive words**: LDNOOBW list (npm `naughty-words`, CC-BY-4.0) in `harness/blocklist.mjs` (+ optional `engine/blocklist-extra.txt`). Removed from `words.js` (150 entries); the harness errors on offensive string literals and on offensive words drawn on screen. The list is never sent to the browser.
+- **Word tools**: `anagrams`, `wordsfrom`, `matchword("C?T")`, `neighbors`, `letterfreq`, `letterscore`.
+- **Categories**: `engine/categories.js`, 28 hand-checked lists; `categories()`, `category(name)`, `categoryof(word)`.
+- **Daily seed and share**: `dailySeed("YYYY-MM-DD")` (exported, for the site); `sharegrid()` emoji squares; optional `share()` export, checked for length, offensive words and leaking `probe().secret`. `play.html` now uses today's seed and shows the share text.
+- New examples: `example-logic.js` (unique 5x5 number grids), `example-type.js` (keyboard word chain), `example-cave.js` (generated caves + share). Prompt examples are now dodge, cave, type, logic (maze and word stay as test fixtures). The harness caught two bugs in my own cave example while writing it (a fallback level that broke its own reqs, a too-strict exit distance).
+- `npm test`: 35/35 cases (6 examples, 29 mutants) and 10/10 engine unit checks. Playtested the three new examples in the browser with the bot.
+
+**Note**: the system prompt grew from ~5.9k to ~9k tokens (more API and examples). It is cached on Claude; on Gemini it costs a little more per call.
+
+**Not verified**: still no real model run (no keys here).
+
+---
+
 ## 2026-10-28 (5) — kenzo-aspuru-takata (Claude)
 
 On branch `harness` (pushed earlier; these changes are not committed yet).

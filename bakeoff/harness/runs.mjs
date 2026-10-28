@@ -57,6 +57,22 @@ export function harnessInvariants(p, eng, memo) {
   if (!p || typeof p !== "object") return out;
   const bad = findNonFinite(p);
   if (bad) out.push({ check: "nan", message: `probe has a non-finite number: ${bad}` });
+  // Card games: probe().cards = { pile: ["AS", ...], hand: [...], ... } lists every card zone. Cards may move
+  // between zones but never appear, vanish, or exist in more copies than at the start.
+  if (p.cards && typeof p.cards === "object") {
+    const all = Object.values(p.cards).flatMap((z) => (Array.isArray(z) ? z : []));
+    const counts = {};
+    for (const c of all) counts[c] = (counts[c] ?? 0) + 1;
+    if (!memo.cards) memo.cards = { total: all.length, counts };
+    else {
+      const extra = Object.keys(counts).filter((c) => counts[c] > (memo.cards.counts[c] ?? 0));
+      const gone = Object.keys(memo.cards.counts).filter((c) => (counts[c] ?? 0) < memo.cards.counts[c]);
+      if (all.length !== memo.cards.total || extra.length || gone.length) {
+        out.push({ check: "cards", message: `cards appeared or vanished: ${memo.cards.total} cards at the start, ${all.length} now${extra.length ? `; extra copies of ${extra.slice(0, 6).join(" ")}` : ""}${gone.length ? `; missing ${gone.slice(0, 6).join(" ")}` : ""}. Every card must stay in exactly one zone of probe().cards` });
+        memo.cards = { total: all.length, counts }; // report each change once
+      }
+    }
+  }
   const pl = p.player, map = eng.getMap();
   const box = pl && [pl.x, pl.y, pl.w ?? 1, pl.h ?? 1].every(Number.isFinite) ? { x: pl.x, y: pl.y, w: pl.w ?? 1, h: pl.h ?? 1 } : null;
   if (box && map && eng.api.boxhit(box.x + 0.01, box.y + 0.01, box.w - 0.02, box.h - 0.02)) {
@@ -154,6 +170,10 @@ export function play(G, o) {
     }
     where = "draw";
     for (let i = 0; i < afterFinish && eng.state.finished; i++) eng.tick(G.game, "", { draw: true });
+    if (eng.state.finished && typeof G.game.share === "function") {
+      where = "share";
+      try { out.share = G.game.share(); } catch (e) { out.shareError = describeError(e).message; }
+    }
     if (snapEvery) out.snaps.push({ frame: out.frames, fb: eng.fb.slice(), end: true });
     out.progressFinal = p?.progress ?? null;
     out.probe = p;
