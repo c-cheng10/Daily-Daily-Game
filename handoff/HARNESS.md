@@ -5,7 +5,7 @@ How to turn "an LLM writes a game" into "a game that has been checked, played an
 **Status (2026-10-28, later the same day): built**, see `bakeoff/README.md`. Built as described below, except:
 - One model call does design + code (with a `<design>` block first), not two.
 - On top of the plan: a self-review step before testing (the model checks its own code against the checklist), model-written `tests` and `invariants()` in the game contract, three different example games in the prompt, a word list for word games, engine diagnostics (NaN in drawing, text cut off, frozen screen), and `npm test`, a suite of 18 broken games that the harness must catch.
-- Not built yet: frame-by-frame play by a model (not worth it, see below), and the Claude and open-weight providers. Only Gemini and the mock exist.
+- Not built: frame-by-frame play by a model (not worth it, see below). Claude, OpenRouter and Groq providers were added afterwards, along with fix-loop memory, a plateau stop, controls and softlock checks, a separate critic model and `npm run report` (see `LOG.md`, session 5).
 - Not yet run against a real model: there is no API key on the machine where it was built. Verified with the mock provider (the full fix loop) and on the examples and the old b01/b03.
 
 ## TL;DR

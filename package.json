@@ -8,9 +8,11 @@
     "check": "node bakeoff/check.mjs",
     "play": "node bakeoff/serve.mjs",
     "words": "node bakeoff/engine/build-words.mjs",
+    "report": "node bakeoff/report.mjs",
     "test": "node bakeoff/harness/selftest.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
     "acorn": "^8.19.0",
     "acorn-walk": "^8.3.5"
   },

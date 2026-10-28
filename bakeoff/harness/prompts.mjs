@@ -79,10 +79,13 @@ Then go through the quality checklist item by item.
 Answer with a <review> block that lists each REAL bug you found (where it is and how you fix it), or "no bugs found". Ignore style. Then return the COMPLETE corrected file in one \`\`\`js block (the same file if nothing was wrong). Keep the design; don't add features.`;
 
 // Execution feedback: concrete failures with a replay, asking for root causes (Self-Debugging / SWE-agent style).
-export function fixPrompt(feedbackText, { attempt, maxAttempts }) {
+export function fixPrompt(feedbackText, { attempt, maxAttempts, history = [] }) {
+  const past = history.filter((h) => h.after).map((h) =>
+    `- Fix ${h.attempt}: you said "${(h.analysis ?? "(no analysis)").replace(/\s+/g, " ").slice(0, 400)}". Result: ${h.before.errors} errors -> ${h.after.errors} errors${h.after.kept ? "" : " (worse or no better, so that version was thrown away; the code below is the best version so far)"}.`);
   return `The test harness ran your game (attempt ${attempt} of ${maxAttempts}). It found these problems, most serious first:
 
 ${feedbackText}
+${past.length ? `\nEarlier fixes (problems marked STILL FAILING survived them, so that approach didn't work; think again about the cause):\n${past.join("\n")}\n` : ""}
 
 How to fix them:
 - For each problem, find the ROOT CAUSE in the code. The replay (seed, frame, buttons, probe) shows exactly what happened; walk through what the code does on that frame.

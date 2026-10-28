@@ -52,6 +52,10 @@ export function evaluateSource(src, { brief, exploreMs = 8000, progress = () => 
     return true;
   };
   const violations = (r) => {
+    if (r.stuck) {
+      add("warn", "stuck", `${r.label}: the player hasn't moved or made progress for ${((r.stuck.frame - r.stuck.since) / 30).toFixed(0)} s although directions were pressed (since frame ${r.stuck.since}); this looks like a softlock`,
+        { repro: { run: r.label, seed: r.seed, frame: r.stuck.frame, inputs: r.stuck.inputs, probe: r.stuck.probe } });
+    }
     for (const v of r.violations) {
       add("error", v.check === "game-invariant" ? "invariant" : v.check, `${v.message} (${v.run}, frame ${v.frame})`,
         { detail: v.detail, repro: { run: v.run, seed: v.seed, frame: v.frame, inputs: v.inputs, probe: v.probe } });
@@ -70,6 +74,19 @@ export function evaluateSource(src, { brief, exploreMs = 8000, progress = () => 
     randomRuns.push(r);
     if (!runErr(r)) violations(r);
     if (r.error?.timeout) return finish(report);
+  }
+
+  // 3b. Controls: hold each button for 5 s from the start and compare with doing nothing.
+  stage("controls");
+  if (!idleRun.error) {
+    const H = 150, LETTERS = "LRUDOX";
+    const still = play(G, { label: "idle 5 s", frames: H, input: idle(), type, invariants: false });
+    const live = [...LETTERS].filter((L) => {
+      const r = play(G, { label: `hold ${L}`, frames: H, input: () => L, type, invariants: false });
+      return !r.error && !still.error && (r.hash !== still.hash || r.fbHash !== still.fbHash);
+    });
+    metrics.controls = live.join("") || "none";
+    if (!still.error && !live.length) add("error", "controls", "no button changes anything in the first 5 seconds: holding each of L R U D O X looks exactly like doing nothing. Check that update() reads btn()/btnp() and that the start/title screen responds");
   }
 
   // 4. probe() contract.

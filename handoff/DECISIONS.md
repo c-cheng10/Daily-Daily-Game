@@ -13,4 +13,4 @@ Settled decisions. Add new ones at the bottom with a date and who decided.
 
 ## Open
 
-- OpenRouter or Groq for the free open-weight model? (from `HANDOFF.md`)
+- OpenRouter or Groq for the free open-weight model? (from `HANDOFF.md`) Both are now supported by the harness (`--provider openrouter` / `groq`), so this is only a choice of which free model to use.

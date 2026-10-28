@@ -6,7 +6,7 @@ export const MAX_PROBLEMS = 3;
 export function feedbackText(report, { max = MAX_PROBLEMS } = {}) {
   const chosen = pickIssues(report, max);
   const parts = chosen.map((i, n) => {
-    const lines = [`${n + 1}. [${i.severity}] ${i.check}: ${i.message}${i.times > 1 ? ` (seen ${i.times}x)` : ""}`];
+    const lines = [`${n + 1}. [${i.severity}]${i.persist ? " [STILL FAILING after your last fix]" : ""} ${i.check}: ${i.message}${i.times > 1 ? ` (seen ${i.times}x)` : ""}`];
     if (i.repro) {
       const r = i.repro;
       lines.push(`   replay: run "${r.run}", seed ${r.seed}, frame ${r.frame}`);

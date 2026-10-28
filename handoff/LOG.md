@@ -4,6 +4,22 @@ Newest first. One entry per session: date, who, what changed, what's next.
 
 ---
 
+## 2026-10-28 (5) — kenzo-aspuru-takata (Claude)
+
+On branch `harness` (pushed earlier; these changes are not committed yet).
+
+**Done**: harness improvements.
+- Providers: **Claude** via the official `@anthropic-ai/sdk` (streaming + `finalMessage()`, `max_tokens` 64000, effort `high` set explicitly, `fallbacks: "default"` with beta `server-side-fallback-2026-07-01`, refusals raise a clear error, the ~6k-token system prompt is cached, cache tokens are priced). **OpenRouter** and **Groq** through their documented chat-completions API (`--provider openrouter|groq --model <id>`), so the open-weight choice is now just a flag. Request shape verified against a local fake server (no money spent). Env vars are `BAKEOFF_CLAUDE_MODEL` / `BAKEOFF_CLAUDE_EFFORT`, because `CLAUDE_EFFORT` is already set by Claude Code's own shell and silently overrode the effort.
+- Fix loop: remembers earlier fixes (problems that survived are marked STILL FAILING, with the model's own analysis and the result), stops after two fixes in a row that don't improve, and tells the model plainly when its reply was cut off at the output limit (cut-off code is still extracted).
+- New checks: **controls** (each button held 5 s vs. idle; error if none does anything) and **stuck** (warning: player position and progress unchanged for 20 s while directions are pressed).
+- `--critic-with <provider>[:model]` so a different, fixed model judges the screenshots; `--parallel N` briefs at once.
+- `npm run report` writes `results/report.md`: per-model pass rate now and first try, fix rounds, playtest fun and brief match, critic, $ and s per game, exact model versions and dates.
+- `npm test`: 23/23 (2 new cases). Mock pipeline run with `MOCK_STUBBORN=1` (a first fix that doesn't work) to check the memory and the STILL FAILING flag.
+
+**Not verified**: still no real model call (no keys on this machine).
+
+---
+
 ## 2026-10-28 (4) — kenzo-aspuru-takata (Claude)
 
 **Done**: built the generation harness from `HARNESS.md` (see `bakeoff/README.md`).

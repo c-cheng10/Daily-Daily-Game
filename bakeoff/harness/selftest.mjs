@@ -34,6 +34,8 @@ const CASES = [
   { name: "survival where idle never dies", code: must(DODGE, "alive = false;\n      finish();", "alive = alive;"), expect: ["design"] },
   { name: "highscore where skill doesn't matter", code: must(WORD, "points += word.length * word.length; score(points);", "score(points);"), expect: ["score"] },
   { name: "self-test that fails", code: must(DODGE, "frames: 1200, input: \"\", expect: (r) => r.finished || \"never died\"", "frames: 30, input: \"\", expect: (r) => r.finished || \"never died\""), expect: ["self-test"] },
+  { name: "no button does anything", code: must(must(DODGE, "if (btn(0)) px -= 2;", ""), "if (btn(1)) px += 2;", ""), expect: ["controls"] },
+  { name: "player gets stuck halfway (softlock)", code: must(MAZE, "move(player, dx, dy);", "if (player.y < 40) move(player, dx, dy);"), expect: ["stuck"] },
   { name: "text off screen", code: must(DODGE, 'print("TIME " + flr(frame() / 30), 2, 2, 7);', 'print("TIME " + flr(frame() / 30), 110, 2, 7);'), expect: ["engine:printClipped"] },
 ];
 

@@ -100,6 +100,7 @@ export function play(G, o) {
     snaps: [], perf: { mean: 0, max: 0 }, maxSame: 0, progressMax: -Infinity, progressFinal: null, moved: false };
   const memo = {}, times = [], seenViol = new Set();
   let where = "init", h = 2166136261, lastFb = null, same = 0, minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  let lastSig = null, lastChange = 0, dirFrames = 0; // stuck detection
   const probeOf = () => { where = "probe"; return typeof G.game.probe === "function" ? G.game.probe() : null; };
 
   const body = () => {
@@ -122,6 +123,13 @@ export function play(G, o) {
       if (p && Number.isFinite(p.progress)) out.progressMax = Math.max(out.progressMax, p.progress);
       if (p?.player && Number.isFinite(p.player.x)) {
         minX = Math.min(minX, p.player.x); maxX = Math.max(maxX, p.player.x); minY = Math.min(minY, p.player.y); maxY = Math.max(maxY, p.player.y);
+        // Stuck: position, progress and state unchanged for 20 s although directions were pressed most of that time.
+        const sig = `${Math.round(p.player.x)},${Math.round(p.player.y)},${p.progress},${p.state},${p.level}`;
+        if (sig !== lastSig) { lastSig = sig; lastChange = f; dirFrames = 0; }
+        else if (b[0] || b[1] || b[2] || b[3]) dirFrames++;
+        if (!out.stuck && f - lastChange >= 600 && dirFrames >= 300) {
+          out.stuck = { frame: f, since: lastChange, probe: jsonOf(p, 600), inputs: compressInputs(out.inputs) };
+        }
       }
       if (draw) {
         const fh = hashFrame(eng.fb);

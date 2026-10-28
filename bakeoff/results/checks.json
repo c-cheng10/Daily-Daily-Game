@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-28T06:05:44.833Z",
+  "date": "2026-10-28T06:19:53.117Z",
   "results": [
     {
       "file": "engine/example-game.js",
@@ -10,6 +10,7 @@
         "lines": 86,
         "bytes": 2681,
         "type": "survival",
+        "controls": "LR",
         "deterministic": true,
         "idle": {
           "label": "idle",
@@ -93,8 +94,8 @@
           }
         ],
         "search": {
-          "iterations": 2177,
-          "cells": 1959,
+          "iterations": 2075,
+          "cells": 1913,
           "finished": true,
           "finishSeconds": 1.93,
           "bestProgress": 180,
@@ -102,8 +103,8 @@
         },
         "botScore": 179,
         "diag": {},
-        "msPerFrame": 0.024,
-        "msPerFrameMax": 0.57
+        "msPerFrame": 0.032,
+        "msPerFrameMax": 1.32
       },
       "tests": [
         {
@@ -123,6 +124,7 @@
         "static",
         "load",
         "smoke",
+        "controls",
         "probe",
         "bot",
         "determinism",
@@ -144,6 +146,7 @@
         "lines": 116,
         "bytes": 3720,
         "type": "speedrun",
+        "controls": "LRUD",
         "deterministic": true,
         "idle": {
           "label": "idle",
@@ -236,8 +239,8 @@
         },
         "botFinishSeconds": 12.9,
         "diag": {},
-        "msPerFrame": 0.104,
-        "msPerFrameMax": 1.33
+        "msPerFrame": 0.102,
+        "msPerFrameMax": 1.07
       },
       "tests": [
         {
@@ -257,6 +260,7 @@
         "static",
         "load",
         "smoke",
+        "controls",
         "probe",
         "bot",
         "determinism",
@@ -278,6 +282,7 @@
         "lines": 109,
         "bytes": 3901,
         "type": "highscore",
+        "controls": "LRO",
         "deterministic": true,
         "idle": {
           "label": "idle",
@@ -361,8 +366,8 @@
           }
         ],
         "search": {
-          "iterations": 1340,
-          "cells": 257,
+          "iterations": 1375,
+          "cells": 264,
           "finished": false,
           "finishSeconds": null,
           "bestProgress": 52,
@@ -370,8 +375,8 @@
         },
         "botScore": 170,
         "diag": {},
-        "msPerFrame": 0.03,
-        "msPerFrameMax": 1.45
+        "msPerFrame": 0.024,
+        "msPerFrameMax": 1.57
       },
       "tests": [
         {
@@ -391,6 +396,7 @@
         "static",
         "load",
         "smoke",
+        "controls",
         "probe",
         "bot",
         "determinism",
@@ -441,6 +447,7 @@
         "lines": 580,
         "bytes": 16074,
         "type": "highscore",
+        "controls": "LRDX",
         "deterministic": true,
         "idle": {
           "label": "idle",
@@ -490,8 +497,8 @@
         ],
         "bot": [],
         "search": {
-          "iterations": 4022,
-          "cells": 28,
+          "iterations": 3863,
+          "cells": 24,
           "finished": false,
           "finishSeconds": null,
           "bestProgress": 52,
@@ -510,14 +517,15 @@
             }
           }
         },
-        "msPerFrame": 0.288,
-        "msPerFrameMax": 1.26
+        "msPerFrame": 0.286,
+        "msPerFrameMax": 1
       },
       "tests": [],
       "stagesDone": [
         "static",
         "load",
         "smoke",
+        "controls",
         "probe",
         "bot",
         "determinism",
@@ -578,6 +586,7 @@
         "lines": 560,
         "bytes": 15507,
         "type": "speedrun",
+        "controls": "LRUDO",
         "deterministic": true,
         "idle": {
           "label": "idle",
@@ -636,14 +645,15 @@
         },
         "botFinishSeconds": null,
         "diag": {},
-        "msPerFrame": 0.245,
-        "msPerFrameMax": 1.12
+        "msPerFrame": 0.253,
+        "msPerFrameMax": 1.21
       },
       "tests": [],
       "stagesDone": [
         "static",
         "load",
         "smoke",
+        "controls",
         "probe",
         "bot",
         "determinism",
@@ -697,6 +707,7 @@
         "lines": 370,
         "bytes": 10060,
         "type": "survival",
+        "controls": "LRUDOX",
         "deterministic": true,
         "idle": {
           "label": "idle",
@@ -746,7 +757,7 @@
         ],
         "bot": [],
         "search": {
-          "iterations": 1076,
+          "iterations": 1042,
           "cells": 57,
           "finished": true,
           "finishSeconds": 10.03,
@@ -755,14 +766,15 @@
         },
         "botScore": null,
         "diag": {},
-        "msPerFrame": 0.125,
-        "msPerFrameMax": 0.51
+        "msPerFrame": 0.129,
+        "msPerFrameMax": 0.62
       },
       "tests": [],
       "stagesDone": [
         "static",
         "load",
         "smoke",
+        "controls",
         "probe",
         "bot",
         "determinism",
