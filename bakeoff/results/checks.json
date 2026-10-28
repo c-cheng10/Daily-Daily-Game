@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-28T05:57:27.132Z",
+  "date": "2026-10-28T06:05:44.833Z",
   "results": [
     {
       "file": "engine/example-game.js",
@@ -93,8 +93,8 @@
           }
         ],
         "search": {
-          "iterations": 2179,
-          "cells": 1960,
+          "iterations": 2177,
+          "cells": 1959,
           "finished": true,
           "finishSeconds": 1.93,
           "bestProgress": 180,
@@ -102,8 +102,8 @@
         },
         "botScore": 179,
         "diag": {},
-        "msPerFrame": 0.023,
-        "msPerFrameMax": 0.38
+        "msPerFrame": 0.024,
+        "msPerFrameMax": 0.57
       },
       "tests": [
         {
@@ -236,8 +236,8 @@
         },
         "botFinishSeconds": 12.9,
         "diag": {},
-        "msPerFrame": 0.094,
-        "msPerFrameMax": 1.12
+        "msPerFrame": 0.104,
+        "msPerFrameMax": 1.33
       },
       "tests": [
         {
@@ -361,8 +361,8 @@
           }
         ],
         "search": {
-          "iterations": 1369,
-          "cells": 264,
+          "iterations": 1340,
+          "cells": 257,
           "finished": false,
           "finishSeconds": null,
           "bestProgress": 52,
@@ -370,8 +370,8 @@
         },
         "botScore": 170,
         "diag": {},
-        "msPerFrame": 0.023,
-        "msPerFrameMax": 1.66
+        "msPerFrame": 0.03,
+        "msPerFrameMax": 1.45
       },
       "tests": [
         {
@@ -490,7 +490,7 @@
         ],
         "bot": [],
         "search": {
-          "iterations": 4072,
+          "iterations": 4022,
           "cells": 28,
           "finished": false,
           "finishSeconds": null,
@@ -510,8 +510,8 @@
             }
           }
         },
-        "msPerFrame": 0.294,
-        "msPerFrameMax": 4.48
+        "msPerFrame": 0.288,
+        "msPerFrameMax": 1.26
       },
       "tests": [],
       "stagesDone": [
@@ -636,8 +636,8 @@
         },
         "botFinishSeconds": null,
         "diag": {},
-        "msPerFrame": 0.237,
-        "msPerFrameMax": 1.02
+        "msPerFrame": 0.245,
+        "msPerFrameMax": 1.12
       },
       "tests": [],
       "stagesDone": [
@@ -654,6 +654,125 @@
       ],
       "errors": 4,
       "warnings": 2,
+      "pass": false
+    },
+    {
+      "file": "out/gemini-flash-latest/b04.js",
+      "model": "gemini-flash-latest",
+      "brief": "b04",
+      "issues": [
+        {
+          "severity": "error",
+          "check": "banned",
+          "message": "Math.cos: use the engine's cos()",
+          "line": 33,
+          "code": "   31 |     x,\r\n   32 |     y,\r\n>  33 |     vx: Math.cos(moveAng) * speed,\r\n   34 |     vy: Math.sin(moveAng) * speed,\r\n   35 |     ang: rnd(Math.PI * 2),\r",
+          "times": 15
+        },
+        {
+          "severity": "error",
+          "check": "banned",
+          "message": "Math.sin: use the engine's sin()",
+          "line": 34,
+          "code": "   32 |     y,\r\n   33 |     vx: Math.cos(moveAng) * speed,\r\n>  34 |     vy: Math.sin(moveAng) * speed,\r\n   35 |     ang: rnd(Math.PI * 2),\r\n   36 |     vAng: (rnd(0.06) - 0.03),\r",
+          "times": 15
+        },
+        {
+          "severity": "error",
+          "check": "contract",
+          "message": "probe() is missing, so the harness can't see the game state"
+        },
+        {
+          "severity": "error",
+          "check": "contract",
+          "message": "bot() is missing, so nobody shows the game can be played well"
+        },
+        {
+          "severity": "warn",
+          "check": "tests",
+          "message": "no self-tests; add tests for the risks in your design"
+        }
+      ],
+      "metrics": {
+        "lines": 370,
+        "bytes": 10060,
+        "type": "survival",
+        "deterministic": true,
+        "idle": {
+          "label": "idle",
+          "seed": 1234,
+          "frames": 852,
+          "finished": true,
+          "finishSeconds": 28.37,
+          "score": 28,
+          "progressMax": null,
+          "error": null,
+          "violations": 0
+        },
+        "random": [
+          {
+            "label": "random#1",
+            "seed": 1234,
+            "frames": 268,
+            "finished": true,
+            "finishSeconds": 8.9,
+            "score": 8,
+            "progressMax": null,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#2",
+            "seed": 1234,
+            "frames": 541,
+            "finished": true,
+            "finishSeconds": 18,
+            "score": 17,
+            "progressMax": null,
+            "error": null,
+            "violations": 0
+          },
+          {
+            "label": "random#3",
+            "seed": 1234,
+            "frames": 391,
+            "finished": true,
+            "finishSeconds": 13,
+            "score": 12,
+            "progressMax": null,
+            "error": null,
+            "violations": 0
+          }
+        ],
+        "bot": [],
+        "search": {
+          "iterations": 1076,
+          "cells": 57,
+          "finished": true,
+          "finishSeconds": 10.03,
+          "bestProgress": 56,
+          "bestScore": 56
+        },
+        "botScore": null,
+        "diag": {},
+        "msPerFrame": 0.125,
+        "msPerFrameMax": 0.51
+      },
+      "tests": [],
+      "stagesDone": [
+        "static",
+        "load",
+        "smoke",
+        "probe",
+        "bot",
+        "determinism",
+        "tests",
+        "search",
+        "verdicts",
+        "diagnostics"
+      ],
+      "errors": 4,
+      "warnings": 1,
       "pass": false
     }
   ]
